@@ -114,7 +114,7 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
       }}
     >
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
-        <span style={{ fontSize:10, fontWeight:700, color: active ? T.blue : T.faint, textTransform:"uppercase", letterSpacing:"0.1em" }}>{label}{active ? " ?" : ""}</span>
+        <span style={{ fontSize:10, fontWeight:700, color: active ? T.blue : T.faint, textTransform:"uppercase", letterSpacing:"0.1em" }}>{label}{active ? " ●" : ""}</span>
         <div style={{ background:`${color}18`, border:`1px solid ${color}30`, borderRadius:9, padding:"5px 6px", display:"flex" }}>
           <Icon size={13} style={{ color }} strokeWidth={2.2}/>
         </div>
@@ -257,7 +257,7 @@ function AIChatPanel() {
         <motion.div animate={{ scale:[1,1.3,1], opacity:[1,0.5,1] }} transition={{ repeat:Infinity, duration:2.5 }}
           style={{ width:7, height:7, borderRadius:"50%", background:T.green, boxShadow:`0 0 8px ${T.green}` }}/>
         <span style={{ fontSize:10, fontWeight:700, color:T.muted, textTransform:"uppercase", letterSpacing:"0.1em" }}>Hermes AI</span>
-        <span style={{ fontSize:10, color:T.faint, marginLeft:"auto" }}>OpenRouter � DeepSeek v3</span>
+        <span style={{ fontSize:10, color:T.faint, marginLeft:"auto" }}>OpenRouter - DeepSeek v3</span>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"16px 20px", display:"flex", flexDirection:"column", gap:12 }}>
         <AnimatePresence>
@@ -362,7 +362,7 @@ export default function Home() {
           <>
             {/* Hero */}
             <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
-              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"24px 32px", marginBottom:28, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
+              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"32px 40px", marginBottom:32, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
                 <HermesLogo size={52}/>
                 <div>
@@ -372,7 +372,7 @@ export default function Home() {
                       style={{ width:8, height:8, borderRadius:"50%", background:sc.color, boxShadow:`0 0 10px ${sc.color}` }}/>
                     <span style={{ fontSize:11, fontWeight:700, color:sc.color, background:sc.bg, border:`1px solid ${sc.border}`, padding:"3px 11px", borderRadius:20 }}>{sc.label}</span>
                   </div>
-                  <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime � AI-powered � PostgreSQL � Telegram</div>
+                  <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime - AI-powered - PostgreSQL - Telegram</div>
                 </div>
               </div>
               <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
@@ -395,8 +395,8 @@ export default function Home() {
               <SL>Runtime</SL>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} sub={runtime.uptime || "active"}/>
-                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok � ${runtime.tasks?.failed||0} fail`}/>
-                <MetricCard label="Backlog" value={(runtime.tasks?.running||0)+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${runtime.tasks?.running||0} running � ${runtime.tasks?.pending||0} pending`}/>
+                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
+                <MetricCard label="Backlog" value={(runtime.tasks?.running||0)+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${runtime.tasks?.running||0} running - ${runtime.tasks?.pending||0} pending`}/>
                 <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => toggleFilter("failed")} active={taskFilter==="failed"} sub="click para filtrar"/>
               </div>
             </div>

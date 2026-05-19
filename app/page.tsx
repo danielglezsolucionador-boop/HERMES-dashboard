@@ -257,7 +257,7 @@ function AIChatPanel() {
         <motion.div animate={{ scale:[1,1.3,1], opacity:[1,0.5,1] }} transition={{ repeat:Infinity, duration:2.5 }}
           style={{ width:7, height:7, borderRadius:"50%", background:T.green, boxShadow:`0 0 8px ${T.green}` }}/>
         <span style={{ fontSize:10, fontWeight:700, color:T.muted, textTransform:"uppercase", letterSpacing:"0.1em" }}>Hermes AI</span>
-        <span style={{ fontSize:10, color:T.faint, marginLeft:"auto" }}>OpenRouter � DeepSeek v3</span>
+        <span style={{ fontSize:10, color:T.faint, marginLeft:"auto" }}>OpenRouter - DeepSeek v3</span>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"16px 20px", display:"flex", flexDirection:"column", gap:12 }}>
         <AnimatePresence>
@@ -362,12 +362,12 @@ export default function Home() {
           <>
             {/* Hero */}
             <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
-              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"24px 32px", marginBottom:28, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
+              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"32px 40px", marginBottom:32, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
                 <HermesLogo size={52}/>
                 <div>
                   <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:5 }}>
-                    <span style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.04em", background:"linear-gradient(120deg, #60a5fa, #818cf8, #34d399)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>HERMES</span>
+                    <span style={{ fontSize:30, fontWeight:900, letterSpacing:"-0.05em", background:"linear-gradient(120deg, #60a5fa, #818cf8, #34d399)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>HERMES</span>
                     <motion.div animate={{ scale:[1,1.3,1], opacity:[1,0.5,1] }} transition={{ repeat:Infinity, duration:2.5 }}
                       style={{ width:8, height:8, borderRadius:"50%", background:sc.color, boxShadow:`0 0 10px ${sc.color}` }}/>
                     <span style={{ fontSize:11, fontWeight:700, color:sc.color, background:sc.bg, border:`1px solid ${sc.border}`, padding:"3px 11px", borderRadius:20 }}>{sc.label}</span>
