@@ -372,7 +372,7 @@ export default function Home() {
                       style={{ width:8, height:8, borderRadius:"50%", background:sc.color, boxShadow:`0 0 10px ${sc.color}` }}/>
                     <span style={{ fontSize:11, fontWeight:700, color:sc.color, background:sc.bg, border:`1px solid ${sc.border}`, padding:"3px 11px", borderRadius:20 }}>{sc.label}</span>
                   </div>
-                  <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime � AI-powered � PostgreSQL � Telegram</div>
+                  <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime - AI-powered - PostgreSQL - Telegram</div>
                 </div>
               </div>
               <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
