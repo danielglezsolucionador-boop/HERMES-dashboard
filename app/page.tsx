@@ -101,11 +101,11 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.23,1,0.32,1] }}
-      whileHover={{ y: -3, transition: { duration: 0.18 } }}
+      whileHover={{ y: -3, boxShadow: `0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px ${color}40, 0 0 24px ${color}28`, transition: { duration: 0.18 } }}
       onClick={onClick}
       style={{
         background: active ? `rgba(59,130,246,0.12)` : T.surface,
-        border: active ? `1px solid rgba(59,130,246,0.4)` : `1px solid ${T.border}`,
+        border: active ? `1px solid rgba(59,130,246,0.4)` : `1px solid ${T.border}`, borderTop: `2px solid ${color}`,
         borderRadius: 16, padding: "20px 22px",
         boxShadow: active ? `0 0 0 1px rgba(59,130,246,0.2), ${elevation2}` : elevation1,
         backdropFilter: "blur(20px)",
