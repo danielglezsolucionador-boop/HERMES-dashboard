@@ -311,11 +311,13 @@ export default function Home() {
   return (
     <div style={{ minHeight:"100vh", background:T.bg, color:T.text }}>
 
-      {/* Ambient background */}
+      {/* Cinematic background */}
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
-        <div style={{ position:"absolute", top:"-20%", left:"10%", width:800, height:600, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 65%)" }}/>
-        <div style={{ position:"absolute", bottom:"0%", right:"5%", width:600, height:600, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 65%)" }}/>
-        <div style={{ position:"absolute", top:"40%", left:"-10%", width:500, height:500, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(13,148,136,0.09) 0%, transparent 65%)" }}/>
+        <div style={{ position:"absolute", top:"-30%", left:"20%", width:1000, height:800, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(37,99,235,0.22) 0%, rgba(37,99,235,0.08) 40%, transparent 70%)" }}/>
+        <div style={{ position:"absolute", bottom:"-10%", right:"0%", width:800, height:700, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(99,102,241,0.18) 0%, rgba(99,102,241,0.06) 40%, transparent 70%)" }}/>
+        <div style={{ position:"absolute", top:"30%", left:"-15%", width:600, height:600, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(13,148,136,0.12) 0%, transparent 65%)" }}/>
+        <div style={{ position:"absolute", top:"60%", right:"20%", width:400, height:400, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(37,99,235,0.10) 0%, transparent 65%)" }}/>
+        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at 50% 0%, transparent 40%, rgba(2,6,23,0.85) 100%)" }}/>
       </div>
 
       {selectedTaskId && <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)}/>}
