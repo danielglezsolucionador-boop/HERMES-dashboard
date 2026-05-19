@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useRuntime, useTasks } from "./hooks/useRuntime";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -114,7 +114,7 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
       }}
     >
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
-        <span style={{ fontSize:10, fontWeight:700, color: active ? T.blue : T.faint, textTransform:"uppercase", letterSpacing:"0.1em" }}>{label}{active ? " ●" : ""}</span>
+        <span style={{ fontSize:10, fontWeight:700, color: active ? T.blue : T.faint, textTransform:"uppercase", letterSpacing:"0.1em" }}>{label}{active ? " ?" : ""}</span>
         <div style={{ background:`${color}18`, border:`1px solid ${color}30`, borderRadius:9, padding:"5px 6px", display:"flex" }}>
           <Icon size={13} style={{ color }} strokeWidth={2.2}/>
         </div>
@@ -324,7 +324,7 @@ export default function Home() {
 
       {/* Header */}
       <div style={{ position:"sticky", top:0, zIndex:100, background:"rgba(2,6,23,0.92)", backdropFilter:"blur(32px)", borderBottom:`1px solid ${T.border}`, boxShadow:"0 1px 40px rgba(0,0,0,0.6), inset 0 -1px 0 rgba(148,163,184,0.06)" }}>
-        <div style={{ maxWidth:1280, margin:"0 auto", padding:"0 28px", height:62, display:"flex", alignItems:"center", justifyContent:"space-between", position:"relative", zIndex:1 }}>
+        <div className="hermes-header-inner" style={{ maxWidth:1280, margin:"0 auto", padding:"0 28px", height:62, display:"flex", alignItems:"center", justifyContent:"space-between", position:"relative", zIndex:1 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
             <HermesLogo size={34}/>
             <div>
@@ -333,23 +333,23 @@ export default function Home() {
             </div>
           </div>
           <div style={{ display:"flex", alignItems:"center", gap:16 }}>
-            {error && <span style={{ fontSize:11, color:T.red, fontWeight:600 }}>⚠ Backend offline</span>}
+            {error && <span style={{ fontSize:11, color:T.red, fontWeight:600 }}>? Backend offline</span>}
             {taskFilter && (
               <motion.span initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
                 style={{ fontSize:11, fontWeight:700, color:T.blue, background:"rgba(59,130,246,0.12)", border:"1px solid rgba(59,130,246,0.25)", padding:"4px 12px", borderRadius:20, cursor:"pointer" }}
                 onClick={() => setTaskFilter(null)}>
-                {taskFilter} �
+                {taskFilter} ?
               </motion.span>
             )}
             <button onClick={refresh} style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(148,163,184,0.06)", border:`1px solid ${T.border}`, borderRadius:9, padding:"6px 13px", cursor:"pointer", fontSize:11, color:T.muted, fontWeight:600 }}>
-              <RefreshCw size={10}/>{lastUpdated ? lastUpdated.toLocaleTimeString() : "�"}
+              <RefreshCw size={10}/>{lastUpdated ? lastUpdated.toLocaleTimeString() : "?"}
             </button>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth:1280, margin:"0 auto", padding:"32px 28px", position:"relative", zIndex:1 }}>
+      <div className="hermes-content" style={{ maxWidth:1280, margin:"0 auto", padding:"32px 28px", position:"relative", zIndex:1 }}>
 
         {loading && (
           <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", minHeight:500, gap:20 }}>
@@ -364,7 +364,7 @@ export default function Home() {
           <>
             {/* Hero */}
             <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
-              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"32px 40px", marginBottom:32, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
+              className="hermes-hero" style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"32px 40px", marginBottom:32, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
                 <HermesLogo size={52}/>
                 <div>
@@ -377,7 +377,7 @@ export default function Home() {
                   <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime - AI-powered - PostgreSQL - Telegram</div>
                 </div>
               </div>
-              <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
+              <div className="hermes-hero-stats" style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
                 {[
                   { label:"Status", value:runtime.uptime || "active" },
                   { label:"Provider", value:runtime.ai?.provider || "OpenRouter" },
@@ -395,7 +395,7 @@ export default function Home() {
             {/* Runtime metrics */}
             <div style={{ marginBottom:28 }}>
               <SL>Runtime</SL>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
+              <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} sub={runtime.uptime || "active"}/>
                 <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
                 <MetricCard label="Backlog" value={(runtime.tasks?.running||0)+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${runtime.tasks?.running||0} running - ${runtime.tasks?.pending||0} pending`}/>
@@ -406,7 +406,7 @@ export default function Home() {
             {/* AI metrics */}
             <div style={{ marginBottom:28 }}>
               <SL>AI Pipeline</SL>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
+              <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Requests IA" value={runtime.ai?.requests||0} icon={Cpu} color={T.indigo} delay={0.22} sub="total"/>
                 <MetricCard label="Pipeline avg" value={runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "-"} icon={Zap} color={T.teal} delay={0.28} sub="latencia total"/>
                 <MetricCard label="Provider avg" value={runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "-"} icon={MessageSquare} color={T.amber} delay={0.34} sub="openrouter"/>
@@ -415,7 +415,7 @@ export default function Home() {
             </div>
 
             {/* Bottom grid */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(320px, 1fr))", gap:20 }}>
+            <div className="hermes-bottom-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(320px, 1fr))", gap:20 }}>
 
               {/* Tasks */}
               <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.44, duration:0.45 }}
@@ -432,7 +432,7 @@ export default function Home() {
                         style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 6px", borderBottom:`1px solid ${T.border}`, borderRadius:6, cursor:"pointer", transition:"background 0.15s" }}>
                         <span style={{ fontSize:9, fontWeight:800, color:tc, background:`${tc}14`, border:`1px solid ${tc}28`, padding:"2px 8px", borderRadius:20, textTransform:"uppercase", letterSpacing:"0.05em", whiteSpace:"nowrap" }}>{t.status}</span>
                         <span style={{ fontSize:12, color:T.sub, flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontWeight:500 }}>{t.title}</span>
-                        <span style={{ fontSize:10, color:T.faint }}>�</span>
+                        <span style={{ fontSize:10, color:T.faint }}>?</span>
                       </motion.div>
                     );
                   })

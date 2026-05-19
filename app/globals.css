@@ -87,3 +87,12 @@ html, body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* === RESPONSIVE MOBILE === */
+@media (max-width: 768px) {
+  .hermes-header-inner { padding: 0 16px !important; }
+  .hermes-content { padding: 20px 14px !important; }
+  .hermes-hero { padding: 22px 20px !important; flex-direction: column !important; align-items: flex-start !important; }
+  .hermes-hero-stats { flex-direction: row !important; flex-wrap: wrap !important; gap: 16px !important; }
+  .hermes-bottom-grid { grid-template-columns: 1fr !important; }
+  .hermes-metric-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
