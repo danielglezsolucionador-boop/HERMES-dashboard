@@ -104,7 +104,7 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
       whileHover={{ y: -3, transition: { duration: 0.18 } }}
       onClick={onClick}
       style={{
-        background: active ? `rgba(59,130,246,0.12)` : T.surface,
+        background: active ? `rgba(59,130,246,0.12)` : T.surface, backgroundImage: active ? "none" : "linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%)",
         border: active ? `1px solid rgba(59,130,246,0.4)` : `1px solid ${T.border}`,
         borderRadius: 16, padding: "20px 22px",
         boxShadow: active ? `0 0 0 1px rgba(59,130,246,0.2), ${elevation2}` : elevation1,
@@ -315,7 +315,7 @@ export default function Home() {
       <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
         <div style={{ position:"absolute", top:"-20%", left:"10%", width:800, height:600, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 65%)" }}/>
         <div style={{ position:"absolute", bottom:"0%", right:"5%", width:600, height:600, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(99,102,241,0.12) 0%, transparent 65%)" }}/>
-        <div style={{ position:"absolute", top:"40%", left:"-10%", width:500, height:500, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(13,148,136,0.09) 0%, transparent 65%)" }}/>
+        <div style={{ position:"absolute", top:"40%", left:"-10%", width:500, height:500, borderRadius:"50%", background:"radial-gradient(ellipse, rgba(13,148,136,0.09) 0%, transparent 65%)"}}/>        <div style={{ position:"absolute", inset:0, background:"radial-gradient(ellipse at center, transparent 40%, rgba(2,6,23,0.8) 100%)", pointerEvents:"none" }}/>
       </div>
 
       {selectedTaskId && <TaskDetailModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)}/>}
@@ -362,12 +362,12 @@ export default function Home() {
           <>
             {/* Hero */}
             <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }}
-              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"24px 32px", marginBottom:28, boxShadow:"0 4px 40px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.08), 0 0 0 1px rgba(148,163,184,0.1)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
+              style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:20, padding:"28px 36px", marginBottom:28, boxShadow:"0 8px 60px rgba(0,0,0,0.7), 0 0 120px rgba(59,130,246,0.12), 0 0 0 1px rgba(148,163,184,0.15), inset 0 1px 0 rgba(255,255,255,0.07)", backdropFilter:"blur(24px)", display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:20 }}>
               <div style={{ display:"flex", alignItems:"center", gap:18 }}>
                 <HermesLogo size={52}/>
                 <div>
                   <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:5 }}>
-                    <span style={{ fontSize:24, fontWeight:900, letterSpacing:"-0.04em", background:"linear-gradient(120deg, #60a5fa, #818cf8, #34d399)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>HERMES</span>
+                    <span style={{ fontSize:28, fontWeight:900, letterSpacing:"-0.05em", background:"linear-gradient(120deg, #93C5FD, #818cf8, #34d399)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>HERMES</span>
                     <motion.div animate={{ scale:[1,1.3,1], opacity:[1,0.5,1] }} transition={{ repeat:Infinity, duration:2.5 }}
                       style={{ width:8, height:8, borderRadius:"50%", background:sc.color, boxShadow:`0 0 10px ${sc.color}` }}/>
                     <span style={{ fontSize:11, fontWeight:700, color:sc.color, background:sc.bg, border:`1px solid ${sc.border}`, padding:"3px 11px", borderRadius:20 }}>{sc.label}</span>
