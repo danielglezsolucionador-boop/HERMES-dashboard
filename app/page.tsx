@@ -1,4 +1,4 @@
-"use client";
+ï»¿"use client";
 import { useRuntime, useTasks } from "./hooks/useRuntime";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
@@ -257,7 +257,7 @@ function AIChatPanel() {
         <motion.div animate={{ scale:[1,1.3,1], opacity:[1,0.5,1] }} transition={{ repeat:Infinity, duration:2.5 }}
           style={{ width:7, height:7, borderRadius:"50%", background:T.green, boxShadow:`0 0 8px ${T.green}` }}/>
         <span style={{ fontSize:10, fontWeight:700, color:T.muted, textTransform:"uppercase", letterSpacing:"0.1em" }}>Hermes AI</span>
-        <span style={{ fontSize:10, color:T.faint, marginLeft:"auto" }}>OpenRouter · DeepSeek v3</span>
+        <span style={{ fontSize:10, color:T.faint, marginLeft:"auto" }}>OpenRouter ï¿½ DeepSeek v3</span>
       </div>
       <div style={{ flex:1, overflowY:"auto", padding:"16px 20px", display:"flex", flexDirection:"column", gap:12 }}>
         <AnimatePresence>
@@ -336,11 +336,11 @@ export default function Home() {
               <motion.span initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
                 style={{ fontSize:11, fontWeight:700, color:T.blue, background:"rgba(59,130,246,0.12)", border:"1px solid rgba(59,130,246,0.25)", padding:"4px 12px", borderRadius:20, cursor:"pointer" }}
                 onClick={() => setTaskFilter(null)}>
-                {taskFilter} ×
+                {taskFilter} ï¿½
               </motion.span>
             )}
             <button onClick={refresh} style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(148,163,184,0.06)", border:`1px solid ${T.border}`, borderRadius:9, padding:"6px 13px", cursor:"pointer", fontSize:11, color:T.muted, fontWeight:600 }}>
-              <RefreshCw size={10}/>{lastUpdated ? lastUpdated.toLocaleTimeString() : "—"}
+              <RefreshCw size={10}/>{lastUpdated ? lastUpdated.toLocaleTimeString() : "ï¿½"}
             </button>
           </div>
         </div>
@@ -372,7 +372,7 @@ export default function Home() {
                       style={{ width:8, height:8, borderRadius:"50%", background:sc.color, boxShadow:`0 0 10px ${sc.color}` }}/>
                     <span style={{ fontSize:11, fontWeight:700, color:sc.color, background:sc.bg, border:`1px solid ${sc.border}`, padding:"3px 11px", borderRadius:20 }}>{sc.label}</span>
                   </div>
-                  <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime · AI-powered · PostgreSQL · Telegram</div>
+                  <div style={{ fontSize:12, color:T.faint, fontWeight:500 }}>Operational Runtime ï¿½ AI-powered ï¿½ PostgreSQL ï¿½ Telegram</div>
                 </div>
               </div>
               <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
@@ -395,8 +395,8 @@ export default function Home() {
               <SL>Runtime</SL>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} sub={runtime.uptime || "active"}/>
-                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok · ${runtime.tasks?.failed||0} fail`}/>
-                <MetricCard label="Backlog" value={(runtime.tasks?.running||0)+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${runtime.tasks?.running||0} running · ${runtime.tasks?.pending||0} pending`}/>
+                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok ï¿½ ${runtime.tasks?.failed||0} fail`}/>
+                <MetricCard label="Backlog" value={(runtime.tasks?.running||0)+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${runtime.tasks?.running||0} running ï¿½ ${runtime.tasks?.pending||0} pending`}/>
                 <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => toggleFilter("failed")} active={taskFilter==="failed"} sub="click para filtrar"/>
               </div>
             </div>
@@ -406,9 +406,9 @@ export default function Home() {
               <SL>AI Pipeline</SL>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Requests IA" value={runtime.ai?.requests||0} icon={Cpu} color={T.indigo} delay={0.22} sub="total"/>
-                <MetricCard label="Pipeline avg" value={runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "—"} icon={Zap} color={T.teal} delay={0.28} sub="latencia total"/>
-                <MetricCard label="Provider avg" value={runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "—"} icon={MessageSquare} color={T.amber} delay={0.34} sub="openrouter"/>
-                <MetricCard label="DB Context avg" value={runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "—"} icon={Database} color={T.teal} delay={0.4} sub="context builder"/>
+                <MetricCard label="Pipeline avg" value={runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "ï¿½"} icon={Zap} color={T.teal} delay={0.28} sub="latencia total"/>
+                <MetricCard label="Provider avg" value={runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "ï¿½"} icon={MessageSquare} color={T.amber} delay={0.34} sub="openrouter"/>
+                <MetricCard label="DB Context avg" value={runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "ï¿½"} icon={Database} color={T.teal} delay={0.4} sub="context builder"/>
               </div>
             </div>
 
@@ -418,7 +418,7 @@ export default function Home() {
               {/* Tasks */}
               <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.44, duration:0.45 }}
                 style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:"22px 24px", boxShadow:elevation2, backdropFilter:"blur(20px)" }}>
-                <SL>Tasks{taskFilter ? ` — ${taskFilter}` : " recientes"}</SL>
+                <SL>Tasks{taskFilter ? ` ï¿½ ${taskFilter}` : " recientes"}</SL>
                 {filteredTasks.length === 0
                   ? <div style={{ color:T.faint, fontSize:13, padding:"20px 0", textAlign:"center" }}>Sin tasks</div>
                   : filteredTasks.slice(0,12).map((t:any, i:number) => {
@@ -430,7 +430,7 @@ export default function Home() {
                         style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 6px", borderBottom:`1px solid ${T.border}`, borderRadius:6, cursor:"pointer", transition:"background 0.15s" }}>
                         <span style={{ fontSize:9, fontWeight:800, color:tc, background:`${tc}14`, border:`1px solid ${tc}28`, padding:"2px 8px", borderRadius:20, textTransform:"uppercase", letterSpacing:"0.05em", whiteSpace:"nowrap" }}>{t.status}</span>
                         <span style={{ fontSize:12, color:T.sub, flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontWeight:500 }}>{t.title}</span>
-                        <span style={{ fontSize:10, color:T.faint }}>›</span>
+                        <span style={{ fontSize:10, color:T.faint }}>ï¿½</span>
                       </motion.div>
                     );
                   })
