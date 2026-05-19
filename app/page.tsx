@@ -38,9 +38,9 @@ function HermesLogo({ size = 40 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 80 80" fill="none">
       <defs>
         <radialGradient id="core" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#60A5FA"/>
-          <stop offset="60%" stopColor="#2563EB"/>
-          <stop offset="100%" stopColor="#1E3A8A"/>
+          <stop offset="0%" stopColor="#FCD34D"/>
+          <stop offset="60%" stopColor="#D97706"/>
+          <stop offset="100%" stopColor="#92400E"/>
         </radialGradient>
         <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#0F1E3D"/>
@@ -67,7 +67,7 @@ function HermesLogo({ size = 40 }: { size?: number }) {
       <circle cx="40" cy="40" r="13" stroke="#3B82F6" strokeWidth="1" fill="none" strokeOpacity="0.9" filter="url(#ringGlow)"/>
       <circle cx="40" cy="40" r="13" fill="#0F172A" fillOpacity="0.8"/>
       <circle cx="40" cy="40" r="8" fill="url(#core)" filter="url(#coreGlow)"/>
-      <circle cx="40" cy="40" r="4.5" fill="#93C5FD" opacity="0.95"/>
+      <circle cx="40" cy="40" r="4.5" fill="#FDE68A" opacity="0.95"/>
       <circle cx="40" cy="40" r="2" fill="white"/>
       <circle cx="40" cy="11" r="2.5" fill="#3B82F6" filter="url(#ringGlow)"/>
       <circle cx="69" cy="40" r="2" fill="#2563EB" filter="url(#ringGlow)"/>
