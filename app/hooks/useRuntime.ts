@@ -83,7 +83,8 @@ export function useTasks(status: string | null = null, intervalMs = 10000) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetch_tasks = useCallback(async () => {
+  const fetch_tasks = useCallback(async (showLoading = false) => {
+    if (showLoading) setLoading(true);
     try {
       const params = new URLSearchParams({ limit: "100" });
       if (status) params.set("status", status);
@@ -99,8 +100,8 @@ export function useTasks(status: string | null = null, intervalMs = 10000) {
   }, [status]);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => void fetch_tasks(), 0);
-    const interval = setInterval(fetch_tasks, intervalMs);
+    const timeout = window.setTimeout(() => void fetch_tasks(true), 0);
+    const interval = setInterval(() => void fetch_tasks(false), intervalMs);
     return () => {
       window.clearTimeout(timeout);
       clearInterval(interval);

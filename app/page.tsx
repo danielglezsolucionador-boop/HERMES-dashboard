@@ -115,19 +115,15 @@ type TaskDetail = Task & {
 
 function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, active }: MetricCardProps) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.23,1,0.32,1] }}
       whileHover={{ y: -3, boxShadow: `0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px ${color}40, 0 0 24px ${color}28`, transition: { duration: 0.18 } }}
       onClick={onClick}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={(event) => {
-        if (!onClick || (event.key !== "Enter" && event.key !== " ")) return;
-        event.preventDefault();
-        onClick();
-      }}
+      disabled={!onClick}
+      aria-pressed={onClick ? Boolean(active) : undefined}
       style={{
         background: active ? `rgba(59,130,246,0.12)` : T.surface,
         border: active ? `1px solid rgba(59,130,246,0.4)` : `1px solid ${T.border}`, borderTop: `2px solid ${color}`,
@@ -136,17 +132,21 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
         backdropFilter: "blur(20px)",
         cursor: onClick ? "pointer" : "default",
         transition: "all 0.2s ease",
+        color: "inherit",
+        font: "inherit",
+        textAlign: "left",
+        width: "100%",
       }}
     >
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
-        <span style={{ fontSize:10, fontWeight:700, color: active ? T.blue : T.faint, textTransform:"uppercase", letterSpacing:"0.1em" }}>{label}{active ? " ?" : ""}</span>
+        <span style={{ fontSize:10, fontWeight:700, color: active ? T.blue : T.faint, textTransform:"uppercase", letterSpacing:"0.1em" }}>{label}{active ? " activo" : ""}</span>
         <div style={{ background:`${color}18`, border:`1px solid ${color}30`, borderRadius:9, padding:"5px 6px", display:"flex" }}>
           <Icon size={13} style={{ color }} strokeWidth={2.2}/>
         </div>
       </div>
       <div style={{ fontSize:32, fontWeight:800, color: active ? T.blue : T.text, lineHeight:1, letterSpacing:"-0.03em" }}>{value}</div>
       {sub && <div style={{ fontSize:11, color:T.faint, marginTop:8, fontWeight:500 }}>{sub}</div>}
-    </motion.div>
+    </motion.button>
   );
 }
 
@@ -338,7 +338,7 @@ function AIChatPanel() {
 export default function Home() {
   const { runtime, loading, error, lastUpdated, refresh } = useRuntime(5000);
   const [taskFilter, setTaskFilter] = useState<string|null>(null);
-  const { tasks } = useTasks(taskFilter, 10000);
+  const { tasks, loading: tasksLoading } = useTasks(taskFilter, 10000);
   const [selectedTaskId, setSelectedTaskId] = useState<string|null>(null);
   const filteredTasks = tasks;
   const status = runtime?.status || "offline";
@@ -381,7 +381,7 @@ export default function Home() {
               <motion.span initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
                 style={{ fontSize:11, fontWeight:700, color:T.blue, background:"rgba(59,130,246,0.12)", border:"1px solid rgba(59,130,246,0.25)", padding:"4px 12px", borderRadius:20, cursor:"pointer" }}
                 onClick={() => setTaskFilter(null)}>
-                {taskFilter} ?
+                {taskFilter} activo
               </motion.span>
             )}
             <button onClick={refresh} style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(148,163,184,0.06)", border:`1px solid ${T.border}`, borderRadius:9, padding:"6px 13px", cursor:"pointer", fontSize:11, color:T.muted, fontWeight:600 }}>
@@ -440,9 +440,9 @@ export default function Home() {
               <SL>Runtime</SL>
               <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} sub={runtime.uptime || "active"}/>
-                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
-                <MetricCard label="Backlog" value={doing+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${doing} doing - ${runtime.tasks?.pending||0} pending`}/>
-                <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => toggleFilter("failed")} active={taskFilter==="failed"} sub="click para filtrar"/>
+                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={taskFilter==="done" ? "filtro activo" : `${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
+                <MetricCard label="Backlog" value={doing+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={taskFilter==="pending" ? "filtro activo" : `${doing} doing - ${runtime.tasks?.pending||0} pending`}/>
+                <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => toggleFilter("failed")} active={taskFilter==="failed"} sub={taskFilter==="failed" ? "filtro activo" : "click para filtrar"}/>
               </div>
             </div>
 
@@ -463,8 +463,10 @@ export default function Home() {
               {/* Tasks */}
               <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.44, duration:0.45 }}
                 style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:"22px 24px", boxShadow:elevation2, backdropFilter:"blur(20px)" }}>
-                <SL>Tasks{taskFilter ? ` - ${taskFilter}` : " recientes"}</SL>
-                {filteredTasks.length === 0
+                <SL>Tasks{taskFilter ? ` - ${taskFilter} (${filteredTasks.length})` : " recientes"}</SL>
+                {tasksLoading
+                  ? <div style={{ color:T.faint, fontSize:13, padding:"20px 0", textAlign:"center" }}>Cargando tasks...</div>
+                  : filteredTasks.length === 0
                   ? <div style={{ color:T.faint, fontSize:13, padding:"20px 0", textAlign:"center" }}>Sin tasks</div>
                   : filteredTasks.slice(0,12).map((t: Task, i:number) => {
                     const tc = TC[t.status] || T.muted;
