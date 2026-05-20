@@ -1,5 +1,5 @@
 "use client";
-import { useRuntime, useTasks, type Task } from "./hooks/useRuntime";
+import { useRuntime, useTasks, type Task, type TaskView } from "./hooks/useRuntime";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, type CSSProperties, type ComponentType, type ReactNode } from "react";
 import {
@@ -264,6 +264,63 @@ function SL({ children }: { children: ReactNode }) {
   );
 }
 
+type InsightKey = "status" | "ai-requests" | "pipeline" | "provider" | "db-context" | null;
+
+const TASK_VIEW_LABEL: Record<Exclude<TaskView, null>, string> = {
+  processed: "procesadas",
+  backlog: "backlog",
+  failed: "fallidas",
+};
+
+type InsightData = {
+  title: string;
+  value: string | number;
+  caption: string;
+  color: string;
+  icon: IconComponent;
+  rows: { label: string; value: string | number }[];
+};
+
+function MetricInsight({ insight }: { insight: InsightData }) {
+  const Icon = insight.icon;
+  return (
+    <motion.div
+      initial={{ opacity:0, y:12 }}
+      animate={{ opacity:1, y:0 }}
+      transition={{ duration:0.28, ease:[0.23,1,0.32,1] }}
+      style={{
+        background:T.surface,
+        border:`1px solid ${insight.color}45`,
+        borderTop:`2px solid ${insight.color}`,
+        borderRadius:18,
+        padding:"18px 20px",
+        marginBottom:28,
+        boxShadow:elevation2,
+        backdropFilter:"blur(20px)",
+      }}
+    >
+      <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:14 }}>
+        <div style={{ background:`${insight.color}18`, border:`1px solid ${insight.color}35`, borderRadius:10, padding:"8px 9px", display:"flex" }}>
+          <Icon size={16} style={{ color:insight.color }} strokeWidth={2.2}/>
+        </div>
+        <div>
+          <div style={{ fontSize:10, fontWeight:800, color:insight.color, textTransform:"uppercase", letterSpacing:"0.12em" }}>{insight.title}</div>
+          <div style={{ fontSize:12, color:T.muted, marginTop:3, fontWeight:500 }}>{insight.caption}</div>
+        </div>
+        <div style={{ marginLeft:"auto", fontSize:24, fontWeight:900, color:T.text, letterSpacing:"-0.03em" }}>{insight.value}</div>
+      </div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(160px, 1fr))", gap:10 }}>
+        {insight.rows.map(row => (
+          <div key={row.label} style={{ background:"rgba(15,23,42,0.55)", border:`1px solid ${T.border}`, borderRadius:10, padding:"10px 12px" }}>
+            <div style={{ fontSize:9, fontWeight:800, color:T.faint, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:5 }}>{row.label}</div>
+            <div style={{ fontSize:13, fontWeight:700, color:T.sub, wordBreak:"break-word" }}>{row.value}</div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
 function AIChatPanel() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<{role:string;text:string;ms?:number}[]>([
@@ -337,7 +394,8 @@ function AIChatPanel() {
 
 export default function Home() {
   const { runtime, loading, error, lastUpdated, refresh } = useRuntime(5000);
-  const [taskFilter, setTaskFilter] = useState<string|null>(null);
+  const [taskFilter, setTaskFilter] = useState<TaskView>(null);
+  const [activeInsight, setActiveInsight] = useState<InsightKey>(null);
   const { tasks, loading: tasksLoading } = useTasks(taskFilter, 10000);
   const [selectedTaskId, setSelectedTaskId] = useState<string|null>(null);
   const filteredTasks = tasks;
@@ -349,7 +407,95 @@ export default function Home() {
   const aiRequests = runtime?.ai?.ai_requests_total ?? runtime?.ai?.requests ?? 0;
   const runnerStatus = runtime?.runner?.runner_status || "unknown";
   const runnerAlive = Boolean(runtime?.runner?.runner_alive);
-  const toggleFilter = (f: string) => setTaskFilter(prev => prev === f ? null : f);
+  const processedCount = (runtime?.tasks?.done || 0) + (runtime?.tasks?.failed || 0);
+  const scrollToPanel = (id: string) => {
+    [120, 420].forEach(delay => {
+      window.setTimeout(() => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY - 78;
+        window.scrollTo({ top: Math.max(0, top), behavior:"smooth" });
+      }, delay);
+    });
+  };
+  const selectTaskView = (view: Exclude<TaskView, null>) => {
+    const next = taskFilter === view ? null : view;
+    setTaskFilter(next);
+    setActiveInsight(null);
+    scrollToPanel("hermes-tasks-panel");
+  };
+  const selectInsight = (insight: Exclude<InsightKey, null>) => {
+    setActiveInsight(insight);
+    scrollToPanel("hermes-insight-panel");
+  };
+
+  const insightData: InsightData | null = !runtime || !activeInsight ? null : ({
+    status: {
+      title: "Estado runtime",
+      value: sc.label,
+      caption: "Snapshot operacional actual desde /runtime/status.",
+      color: sc.color,
+      icon: Activity,
+      rows: [
+        { label:"Runtime", value: runtime.status },
+        { label:"Runner", value: runnerStatus },
+        { label:"Runner alive", value: runnerAlive ? "true" : "false" },
+        { label:"Ultimo loop", value: runtime.runner?.last_loop_at || "-" },
+      ],
+    },
+    "ai-requests": {
+      title: "Requests IA",
+      value: aiRequests,
+      caption: "Total reportado por el runtime de IA.",
+      color: T.indigo,
+      icon: Cpu,
+      rows: [
+        { label:"Provider", value: aiProvider },
+        { label:"Model", value: aiModel },
+        { label:"Pipeline avg", value: runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "-" },
+        { label:"DB context avg", value: runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "-" },
+      ],
+    },
+    pipeline: {
+      title: "Pipeline avg",
+      value: runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "-",
+      caption: "Latencia promedio total del pipeline IA.",
+      color: T.teal,
+      icon: Zap,
+      rows: [
+        { label:"Provider avg", value: runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "-" },
+        { label:"DB context avg", value: runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "-" },
+        { label:"Provider", value: aiProvider },
+        { label:"Model", value: aiModel },
+      ],
+    },
+    provider: {
+      title: "Provider avg",
+      value: runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "-",
+      caption: "Tiempo promedio reportado para el provider IA.",
+      color: T.amber,
+      icon: MessageSquare,
+      rows: [
+        { label:"Provider", value: aiProvider },
+        { label:"Model", value: aiModel },
+        { label:"Requests IA", value: aiRequests },
+        { label:"Runtime", value: runtime.status },
+      ],
+    },
+    "db-context": {
+      title: "DB context avg",
+      value: runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "-",
+      caption: "Tiempo promedio de construccion de contexto desde PostgreSQL.",
+      color: T.teal,
+      icon: Database,
+      rows: [
+        { label:"Tasks totales", value: runtime.tasks?.total || 0 },
+        { label:"Backlog", value: doing + (runtime.tasks?.pending || 0) },
+        { label:"Fallidas", value: runtime.tasks?.failed || 0 },
+        { label:"Database", value: "PostgreSQL" },
+      ],
+    },
+  })[activeInsight];
 
   return (
     <div style={{ minHeight:"100vh", background:T.bg, color:T.text }}>
@@ -381,7 +527,7 @@ export default function Home() {
               <motion.span initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }}
                 style={{ fontSize:11, fontWeight:700, color:T.blue, background:"rgba(59,130,246,0.12)", border:"1px solid rgba(59,130,246,0.25)", padding:"4px 12px", borderRadius:20, cursor:"pointer" }}
                 onClick={() => setTaskFilter(null)}>
-                {taskFilter} activo
+                {TASK_VIEW_LABEL[taskFilter]} activo
               </motion.span>
             )}
             <button onClick={refresh} style={{ display:"flex", alignItems:"center", gap:6, background:"rgba(148,163,184,0.06)", border:`1px solid ${T.border}`, borderRadius:9, padding:"6px 13px", cursor:"pointer", fontSize:11, color:T.muted, fontWeight:600 }}>
@@ -439,31 +585,85 @@ export default function Home() {
             <div style={{ marginBottom:28 }}>
               <SL>Runtime</SL>
               <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
-                <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} sub={runtime.uptime || "active"}/>
-                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={taskFilter==="done" ? "filtro activo" : `${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
-                <MetricCard label="Backlog" value={doing+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={taskFilter==="pending" ? "filtro activo" : `${doing} doing - ${runtime.tasks?.pending||0} pending`}/>
-                <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => toggleFilter("failed")} active={taskFilter==="failed"} sub={taskFilter==="failed" ? "filtro activo" : "click para filtrar"}/>
+                <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} onClick={() => { void refresh(); selectInsight("status"); }} active={activeInsight==="status"} sub={activeInsight==="status" ? "detalle activo" : runtime.uptime || "active"}/>
+                <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => selectTaskView("processed")} active={taskFilter==="processed"} sub={taskFilter==="processed" ? `${processedCount} filtradas` : `${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
+                <MetricCard label="Backlog" value={doing+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => selectTaskView("backlog")} active={taskFilter==="backlog"} sub={taskFilter==="backlog" ? "doing + pending" : `${doing} doing - ${runtime.tasks?.pending||0} pending`}/>
+                <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => selectTaskView("failed")} active={taskFilter==="failed"} sub={taskFilter==="failed" ? "filtro activo" : "click para filtrar"}/>
               </div>
             </div>
+
+            {taskFilter && (
+              <motion.div
+                initial={{ opacity:0, y:12 }}
+                animate={{ opacity:1, y:0 }}
+                transition={{ duration:0.28, ease:[0.23,1,0.32,1] }}
+                style={{ background:T.surface, border:`1px solid ${T.borderMd}`, borderRadius:18, padding:"18px 20px", marginBottom:28, boxShadow:elevation2, backdropFilter:"blur(20px)" }}
+              >
+                <SL>Resultado - {TASK_VIEW_LABEL[taskFilter]} ({filteredTasks.length})</SL>
+                {tasksLoading
+                  ? <div style={{ color:T.faint, fontSize:13, padding:"12px 0" }}>Cargando tasks...</div>
+                  : filteredTasks.length === 0
+                  ? <div style={{ color:T.faint, fontSize:13, padding:"12px 0" }}>Sin tasks</div>
+                  : (
+                    <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:10 }}>
+                      {filteredTasks.slice(0,6).map((t: Task, i:number) => {
+                        const tc = TC[t.status] || T.muted;
+                        return (
+                          <motion.button
+                            type="button"
+                            key={t.id}
+                            initial={{ opacity:0, y:6 }}
+                            animate={{ opacity:1, y:0 }}
+                            transition={{ delay:i*0.03 }}
+                            onClick={() => setSelectedTaskId(t.id)}
+                            style={{
+                              background:"rgba(15,23,42,0.55)",
+                              border:`1px solid ${T.border}`,
+                              borderRadius:10,
+                              padding:"10px 12px",
+                              cursor:"pointer",
+                              color:"inherit",
+                              font:"inherit",
+                              textAlign:"left",
+                            }}
+                          >
+                            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:7 }}>
+                              <span style={{ fontSize:9, fontWeight:800, color:tc, background:`${tc}14`, border:`1px solid ${tc}28`, padding:"2px 8px", borderRadius:20, textTransform:"uppercase", letterSpacing:"0.05em" }}>{t.status}</span>
+                              {t.retry_count > 0 && <span style={{ fontSize:10, color:T.faint, fontWeight:700 }}>{t.retry_count} retry</span>}
+                            </div>
+                            <div style={{ fontSize:12, color:T.sub, fontWeight:700, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{t.title}</div>
+                            {t.error && <div style={{ fontSize:10, color:"#fca5a5", marginTop:6, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{t.error}</div>}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  )
+                }
+              </motion.div>
+            )}
 
             {/* AI metrics */}
             <div style={{ marginBottom:28 }}>
               <SL>AI Pipeline</SL>
               <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
-                <MetricCard label="Requests IA" value={aiRequests} icon={Cpu} color={T.indigo} delay={0.22} sub="total"/>
-                <MetricCard label="Pipeline avg" value={runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "-"} icon={Zap} color={T.teal} delay={0.28} sub="latencia total"/>
-                <MetricCard label="Provider avg" value={runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "-"} icon={MessageSquare} color={T.amber} delay={0.34} sub="openrouter"/>
-                <MetricCard label="DB Context avg" value={runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "-"} icon={Database} color={T.teal} delay={0.4} sub="context builder"/>
+                <MetricCard label="Requests IA" value={aiRequests} icon={Cpu} color={T.indigo} delay={0.22} onClick={() => selectInsight("ai-requests")} active={activeInsight==="ai-requests"} sub={activeInsight==="ai-requests" ? "detalle activo" : "total"}/>
+                <MetricCard label="Pipeline avg" value={runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "-"} icon={Zap} color={T.teal} delay={0.28} onClick={() => selectInsight("pipeline")} active={activeInsight==="pipeline"} sub={activeInsight==="pipeline" ? "detalle activo" : "latencia total"}/>
+                <MetricCard label="Provider avg" value={runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "-"} icon={MessageSquare} color={T.amber} delay={0.34} onClick={() => selectInsight("provider")} active={activeInsight==="provider"} sub={activeInsight==="provider" ? "detalle activo" : "openrouter"}/>
+                <MetricCard label="DB Context avg" value={runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "-"} icon={Database} color={T.teal} delay={0.4} onClick={() => selectInsight("db-context")} active={activeInsight==="db-context"} sub={activeInsight==="db-context" ? "detalle activo" : "context builder"}/>
               </div>
+            </div>
+
+            <div id="hermes-insight-panel">
+              {insightData && <MetricInsight insight={insightData}/>}
             </div>
 
             {/* Bottom grid */}
             <div className="hermes-bottom-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(320px, 1fr))", gap:20 }}>
 
               {/* Tasks */}
-              <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.44, duration:0.45 }}
+              <motion.div id="hermes-tasks-panel" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.44, duration:0.45 }}
                 style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:"22px 24px", boxShadow:elevation2, backdropFilter:"blur(20px)" }}>
-                <SL>Tasks{taskFilter ? ` - ${taskFilter} (${filteredTasks.length})` : " recientes"}</SL>
+                <SL>{taskFilter ? `Tasks - ${TASK_VIEW_LABEL[taskFilter]} (${filteredTasks.length})` : "Tasks recientes"}</SL>
                 {tasksLoading
                   ? <div style={{ color:T.faint, fontSize:13, padding:"20px 0", textAlign:"center" }}>Cargando tasks...</div>
                   : filteredTasks.length === 0
@@ -492,7 +692,7 @@ export default function Home() {
                   { label:"Runner", value:runnerStatus, ok:runnerAlive },
                   { label:"Provider", value:aiProvider, ok:true },
                   { label:"Model", value:aiModel, ok:true },
-                  { label:"Database", value:"Railway PostgreSQL", ok:true },
+                  { label:"Database", value:"PostgreSQL", ok:true },
                   { label:"Telegram", value:"Polling activo", ok:true },
                   { label:"Uptime", value:runtime.uptime||"active", ok:runtime.status==="online" },
                 ].map(r => (
