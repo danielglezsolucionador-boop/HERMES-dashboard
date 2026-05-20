@@ -1,7 +1,7 @@
 "use client";
-import { useRuntime, useTasks } from "./hooks/useRuntime";
+import { useRuntime, useTasks, type Task } from "./hooks/useRuntime";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type CSSProperties, type ComponentType, type ReactNode } from "react";
 import {
   Activity, Cpu, MessageSquare, AlertTriangle,
   CheckCircle, Clock, Zap, Database, RefreshCw,
@@ -29,7 +29,6 @@ const T = {
 
 const elevation1 = "0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(59,130,246,0.08)";
 const elevation2 = "0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(148,163,184,0.08)";
-const elevationHover = "0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.2), 0 0 20px rgba(59,130,246,0.1)";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -85,17 +84,36 @@ function HermesLogo({ size = 40 }: { size?: number }) {
   );
 }
 
-const SC: any = {
+const SC: Record<string, { color: string; label: string; bg: string; border: string }> = {
   online:   { color: T.green, label: "Online",   bg: "rgba(16,185,129,0.1)",  border: "rgba(16,185,129,0.25)"  },
   degraded: { color: T.amber, label: "Degraded", bg: "rgba(217,119,6,0.1)",   border: "rgba(217,119,6,0.25)"   },
   offline:  { color: T.red,   label: "Offline",  bg: "rgba(239,68,68,0.1)",   border: "rgba(239,68,68,0.25)"   },
 };
 
-const TC: any = {
+const TC: Record<string, string> = {
   done: T.green, doing: T.blue, pending: T.amber, failed: T.red, review: T.indigo,
 };
 
-function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, active }: any) {
+type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; strokeWidth?: number }>;
+
+type MetricCardProps = {
+  label: string;
+  value: string | number;
+  sub?: string;
+  icon: IconComponent;
+  color: string;
+  delay?: number;
+  onClick?: () => void;
+  active?: boolean;
+};
+
+type TaskDetail = Task & {
+  description?: string | null;
+  max_retries?: number;
+  updated_at?: string;
+};
+
+function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, active }: MetricCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -103,6 +121,13 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
       transition={{ duration: 0.45, delay, ease: [0.23,1,0.32,1] }}
       whileHover={{ y: -3, boxShadow: `0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px ${color}40, 0 0 24px ${color}28`, transition: { duration: 0.18 } }}
       onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={(event) => {
+        if (!onClick || (event.key !== "Enter" && event.key !== " ")) return;
+        event.preventDefault();
+        onClick();
+      }}
       style={{
         background: active ? `rgba(59,130,246,0.12)` : T.surface,
         border: active ? `1px solid rgba(59,130,246,0.4)` : `1px solid ${T.border}`, borderTop: `2px solid ${color}`,
@@ -126,16 +151,28 @@ function MetricCard({ label, value, sub, icon: Icon, color, delay = 0, onClick, 
 }
 
 function TaskDetailModal({ taskId, onClose }: { taskId: string; onClose: () => void }) {
-  const [task, setTask] = useState<any>(null);
+  const [task, setTask] = useState<TaskDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string|null>(null);
 
   useEffect(() => {
-    setLoading(true); setError(null);
+    let active = true;
     fetch(`${API}/tasks/${taskId}`)
       .then(r => r.json())
-      .then(data => { setTask(data); setLoading(false); })
-      .catch(() => { setError("No se pudo cargar la tarea."); setLoading(false); });
+      .then((data: TaskDetail) => {
+        if (!active) return;
+        setTask(data);
+        setError(null);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setError("No se pudo cargar la tarea.");
+        setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [taskId]);
 
   const tc = task ? (TC[task.status] || T.muted) : T.muted;
@@ -218,7 +255,7 @@ function TaskDetailModal({ taskId, onClose }: { taskId: string; onClose: () => v
   );
 }
 
-function SL({ children }: any) {
+function SL({ children }: { children: ReactNode }) {
   return (
     <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
       <div style={{ width:2, height:14, borderRadius:2, background:`linear-gradient(${T.blue}, ${T.indigo})` }}/>
@@ -244,9 +281,9 @@ function AIChatPanel() {
       const res = await fetch(`${API}/ai/test`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ prompt:q }) });
       const data = await res.json();
       const ms = Date.now() - t0;
-      setMessages(m => [...m, { role:"hermes", text: data.success ? (data.content || "Sin respuesta") : "Error del provider", ms }]);
+      setMessages(m => [...m, { role:"hermes", text: data.success ? (data.response || "Sin respuesta operacional.") : "No pude conectarme al provider IA en este momento. Reintentando automaticamente.", ms }]);
     } catch {
-      setMessages(m => [...m, { role:"hermes", text:"Backend no disponible." }]);
+      setMessages(m => [...m, { role:"hermes", text:"No pude conectar con el backend en este momento. Mantengo el panel listo para reintentar." }]);
     } finally { setLoading(false); }
   };
 
@@ -300,12 +337,18 @@ function AIChatPanel() {
 
 export default function Home() {
   const { runtime, loading, error, lastUpdated, refresh } = useRuntime(5000);
-  const { tasks } = useTasks(10000);
   const [taskFilter, setTaskFilter] = useState<string|null>(null);
+  const { tasks } = useTasks(taskFilter, 10000);
   const [selectedTaskId, setSelectedTaskId] = useState<string|null>(null);
-  const filteredTasks = taskFilter ? tasks.filter((t:any) => t.status === taskFilter) : tasks;
+  const filteredTasks = tasks;
   const status = runtime?.status || "offline";
   const sc = SC[status] || SC.offline;
+  const doing = runtime?.tasks?.doing || 0;
+  const aiProvider = runtime?.ai?.last_provider || runtime?.ai?.last_ai_provider || runtime?.runner?.last_ai_provider || runtime?.ai?.provider || "OpenRouter";
+  const aiModel = runtime?.ai?.last_model || runtime?.ai?.last_ai_model || runtime?.runner?.last_ai_model || runtime?.ai?.model || "default";
+  const aiRequests = runtime?.ai?.ai_requests_total ?? runtime?.ai?.requests ?? 0;
+  const runnerStatus = runtime?.runner?.runner_status || "unknown";
+  const runnerAlive = Boolean(runtime?.runner?.runner_alive);
   const toggleFilter = (f: string) => setTaskFilter(prev => prev === f ? null : f);
 
   return (
@@ -380,9 +423,9 @@ export default function Home() {
               <div className="hermes-hero-stats" style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
                 {[
                   { label:"Status", value:runtime.uptime || "active" },
-                  { label:"Provider", value:runtime.ai?.provider || "OpenRouter" },
-                  { label:"Model", value:runtime.ai?.model || "default" },
-                  { label:"Backlog", value:`${(runtime.tasks?.running||0) + (runtime.tasks?.pending||0)}` },
+                  { label:"Provider", value:aiProvider },
+                  { label:"Model", value:aiModel },
+                  { label:"Backlog", value:`${doing + (runtime.tasks?.pending||0)}` },
                 ].map(item => (
                   <div key={item.label} style={{ textAlign:"center" }}>
                     <div style={{ fontSize:17, fontWeight:800, color:T.text, letterSpacing:"-0.02em" }}>{item.value}</div>
@@ -398,7 +441,7 @@ export default function Home() {
               <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
                 <MetricCard label="Estado" value={sc.label} icon={Activity} color={sc.color} delay={0} sub={runtime.uptime || "active"}/>
                 <MetricCard label="Procesadas" value={runtime.tasks?.total||0} icon={CheckCircle} color={T.blue} delay={0.06} onClick={() => toggleFilter("done")} active={taskFilter==="done"} sub={`${runtime.tasks?.done||0} ok - ${runtime.tasks?.failed||0} fail`}/>
-                <MetricCard label="Backlog" value={(runtime.tasks?.running||0)+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${runtime.tasks?.running||0} running - ${runtime.tasks?.pending||0} pending`}/>
+                <MetricCard label="Backlog" value={doing+(runtime.tasks?.pending||0)} icon={Clock} color={T.amber} delay={0.12} onClick={() => toggleFilter("pending")} active={taskFilter==="pending"} sub={`${doing} doing - ${runtime.tasks?.pending||0} pending`}/>
                 <MetricCard label="Fallidas" value={runtime.tasks?.failed||0} icon={AlertTriangle} color={T.red} delay={0.18} onClick={() => toggleFilter("failed")} active={taskFilter==="failed"} sub="click para filtrar"/>
               </div>
             </div>
@@ -407,7 +450,7 @@ export default function Home() {
             <div style={{ marginBottom:28 }}>
               <SL>AI Pipeline</SL>
               <div className="hermes-metric-grid" style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:14 }}>
-                <MetricCard label="Requests IA" value={runtime.ai?.requests||0} icon={Cpu} color={T.indigo} delay={0.22} sub="total"/>
+                <MetricCard label="Requests IA" value={aiRequests} icon={Cpu} color={T.indigo} delay={0.22} sub="total"/>
                 <MetricCard label="Pipeline avg" value={runtime.pipeline_avg_ms > 0 ? `${(runtime.pipeline_avg_ms/1000).toFixed(1)}s` : "-"} icon={Zap} color={T.teal} delay={0.28} sub="latencia total"/>
                 <MetricCard label="Provider avg" value={runtime.provider_avg_ms > 0 ? `${(runtime.provider_avg_ms/1000).toFixed(1)}s` : "-"} icon={MessageSquare} color={T.amber} delay={0.34} sub="openrouter"/>
                 <MetricCard label="DB Context avg" value={runtime.db_context_avg_ms > 0 ? `${runtime.db_context_avg_ms}ms` : "-"} icon={Database} color={T.teal} delay={0.4} sub="context builder"/>
@@ -423,7 +466,7 @@ export default function Home() {
                 <SL>Tasks{taskFilter ? ` - ${taskFilter}` : " recientes"}</SL>
                 {filteredTasks.length === 0
                   ? <div style={{ color:T.faint, fontSize:13, padding:"20px 0", textAlign:"center" }}>Sin tasks</div>
-                  : filteredTasks.slice(0,12).map((t:any, i:number) => {
+                  : filteredTasks.slice(0,12).map((t: Task, i:number) => {
                     const tc = TC[t.status] || T.muted;
                     return (
                       <motion.div key={t.id} initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} transition={{ delay:0.5+i*0.03 }}
@@ -444,9 +487,9 @@ export default function Home() {
                 style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:"22px 24px", boxShadow:elevation2, backdropFilter:"blur(20px)" }}>
                 <SL>Sistema</SL>
                 {[
-                  { label:"Runner", value:runtime.status==="online" ? "Alive" : "Dead", ok:runtime.status==="online" },
-                  { label:"Provider", value:runtime.ai?.provider||"OpenRouter", ok:true },
-                  { label:"Model", value:runtime.ai?.model||"default", ok:true },
+                  { label:"Runner", value:runnerStatus, ok:runnerAlive },
+                  { label:"Provider", value:aiProvider, ok:true },
+                  { label:"Model", value:aiModel, ok:true },
                   { label:"Database", value:"Railway PostgreSQL", ok:true },
                   { label:"Telegram", value:"Polling activo", ok:true },
                   { label:"Uptime", value:runtime.uptime||"active", ok:runtime.status==="online" },

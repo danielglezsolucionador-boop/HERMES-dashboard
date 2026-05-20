@@ -10,13 +10,26 @@ export interface RuntimeData {
     total: number;
     done: number;
     failed: number;
-    running: number;
+    doing: number;
+    running_legacy?: number;
     pending: number;
   };
   ai: {
-    provider: string;
-    model: string;
-    requests: number;
+    provider?: string;
+    model?: string;
+    requests?: number;
+    ai_requests_total?: number;
+    last_provider?: string | null;
+    last_model?: string | null;
+    last_ai_provider?: string | null;
+    last_ai_model?: string | null;
+  };
+  runner?: {
+    runner_status: string;
+    runner_alive: boolean;
+    last_loop_at: string | null;
+    last_ai_provider?: string | null;
+    last_ai_model?: string | null;
   };
   pipeline_avg_ms: number;
   provider_avg_ms: number;
@@ -47,43 +60,51 @@ export function useRuntime(intervalMs = 5000) {
       setRuntime(data);
       setError(null);
       setLastUpdated(new Date());
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Error consultando runtime");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetch_runtime();
+    const timeout = window.setTimeout(() => void fetch_runtime(), 0);
     const interval = setInterval(fetch_runtime, intervalMs);
-    return () => clearInterval(interval);
+    return () => {
+      window.clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [fetch_runtime, intervalMs]);
 
   return { runtime, loading, error, lastUpdated, refresh: fetch_runtime };
 }
 
-export function useTasks(intervalMs = 10000) {
+export function useTasks(status: string | null = null, intervalMs = 10000) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetch_tasks = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/tasks?limit=20`);
+      const params = new URLSearchParams({ limit: "100" });
+      if (status) params.set("status", status);
+      const res = await fetch(`${API_URL}/tasks?${params.toString()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setTasks(data.tasks || []);
+      setTasks(Array.isArray(data) ? data : data.tasks || []);
     } catch {
       // silencioso
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [status]);
 
   useEffect(() => {
-    fetch_tasks();
+    const timeout = window.setTimeout(() => void fetch_tasks(), 0);
     const interval = setInterval(fetch_tasks, intervalMs);
-    return () => clearInterval(interval);
+    return () => {
+      window.clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [fetch_tasks, intervalMs]);
 
   return { tasks, loading, refresh: fetch_tasks };
