@@ -28,11 +28,13 @@
 }
 
 html, body {
-  background: var(--bg-primary);
+  background: #020617;
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .card {
