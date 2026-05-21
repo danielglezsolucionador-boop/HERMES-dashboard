@@ -662,7 +662,7 @@ export default function Home() {
 
               {/* Tasks */}
               <motion.div id="hermes-tasks-panel" initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.44, duration:0.45 }}
-                style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:"22px 24px", boxShadow:elevation2, backdropFilter:"blur(20px)" }}>
+                style={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:18, padding:"22px 24px", boxShadow:elevation2, backdropFilter:"blur(20px)", minWidth:0, maxWidth:"100%", overflow:"hidden" }}>
                 <SL>{taskFilter ? `Tasks - ${TASK_VIEW_LABEL[taskFilter]} (${filteredTasks.length})` : "Tasks recientes"}</SL>
                 {tasksLoading
                   ? <div style={{ color:T.faint, fontSize:13, padding:"20px 0", textAlign:"center" }}>Cargando tasks...</div>
@@ -674,9 +674,9 @@ export default function Home() {
                       <motion.div key={t.id} initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} transition={{ delay:0.5+i*0.03 }}
                         whileHover={{ backgroundColor:"rgba(59,130,246,0.06)" }}
                         onClick={() => setSelectedTaskId(t.id)}
-                        style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 6px", borderBottom:`1px solid ${T.border}`, borderRadius:6, cursor:"pointer", transition:"background 0.15s" }}>
+                        style={{ display:"flex", alignItems:"center", gap:10, padding:"9px 6px", borderBottom:`1px solid ${T.border}`, borderRadius:6, cursor:"pointer", transition:"background 0.15s", minWidth:0 }}>
                         <span style={{ fontSize:9, fontWeight:800, color:tc, background:`${tc}14`, border:`1px solid ${tc}28`, padding:"2px 8px", borderRadius:20, textTransform:"uppercase", letterSpacing:"0.05em", whiteSpace:"nowrap" }}>{t.status}</span>
-                        <span style={{ fontSize:12, color:T.sub, flex:1, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontWeight:500 }}>{t.title}</span>
+                        <span style={{ fontSize:12, color:T.sub, flex:1, minWidth:0, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", fontWeight:500 }}>{t.title}</span>
                         <span style={{ fontSize:10, color:T.faint }}>?</span>
                       </motion.div>
                     );
